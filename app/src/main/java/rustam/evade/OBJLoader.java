@@ -19,7 +19,7 @@ import java.util.List;
 
 public class OBJLoader {
 
-    public Model loadOBJModel(Context ctx, int fileID) {
+    public static Model loadOBJModel(Context ctx, int fileID) {
         InputStream inputStream = ctx.getResources().openRawResource(fileID);
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -113,7 +113,7 @@ public class OBJLoader {
         int currentVertexPointer = Integer.parseInt(vertexData[0]) - 1;
         indices.add(currentVertexPointer);
 
-       // Vector2f currentTexture = textures.get(Integer.parseInt(vertexData[1]) - 1); TODO Model instance is not receiving color/texture data - fix
+       // Vector2f currentTexture = textures.get(Integer.parseInt(vertexData[1]) - 1);// TODO Model instance is not receiving color/texture data - fix
        // texturesArray[currentVertexPointer * 2] = currentTexture.x;
        // texturesArray[currentVertexPointer * 2 + 1] = 1 - currentTexture.y;
 

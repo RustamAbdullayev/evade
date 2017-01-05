@@ -9,7 +9,10 @@ import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.Log;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -20,34 +23,7 @@ import javax.microedition.khronos.opengles.GL10;
  */
 
 public class GameRenderer implements GLSurfaceView.Renderer {
-    private static final String TAG = "MainActivity";
-
-    // Models
-    Model bob;
-
-    // Matrices for client side computations
-    private float[] modelMatrix = new float[16];
-    private float[] viewMatrix = new float[16];
-    private float[] projectionMatrix = new float[16];
-    private float[] MVMatrix = new float[16];
-
-    // additional matrices TODO review
-    private final float[] accumulatedRotation = new float[16];
-    private final float[] currentRotation = new float[16];
-    private final float[] lightModelMatrix = new float[16];
-    private final float[] temporaryMatrix = new float[16];
-
-    // Handles for matrices in OpenGL program
-    private int mModelViewMatrixID;
-    private int mProjectionMatrixID;
-
-    // Handles for vertex attributes
-    private int aPosition;
-    private int aNormal;
-    private int aColor;
-
-    // Handles for OpenGL programs
-    private int programID;
+    final String TAG = "Main Activity";
 
     final String vertexShaderCode =
             "attribute vec4 aPosition;" +
@@ -73,83 +49,23 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             "gl_FragColor = vColor;" +
             "}";
 
+    Model jk;
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        // Set the background clear color to black.
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        jk = OBJLoader.loadOBJModel(GameView.getCurrentContext(), R.raw.suzanne);
 
-        // Enable depth testing
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-
-        // Position the eye in front of the origin.
-        final float eyeX = 0.0f;
-        final float eyeY = 0.0f;
-        final float eyeZ = -0.5f;
-
-        // We are looking toward the distance
-        final float lookX = 0.0f;
-        final float lookY = 0.0f;
-        final float lookZ = -5.0f;
-
-        // Set our up vector. This is where our head would be pointing were we
-        // holding the camera.
-        final float upX = 0.0f;
-        final float upY = 1.0f;
-        final float upZ = 0.0f;
-
-        Matrix.setLookAtM(viewMatrix, 0, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ);
-
-        //Create OpenGL program
-        int vertexShaderID = compileShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShaderID = compileShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
-
-        programID = createAndLinkProgram(vertexShaderID, fragmentShaderID, new String[] {"aPosition", "aNormal", "aColor"});
-
-        bob = new OBJLoader().loadOBJModel(GameView.getCurrentContext() , R.raw.suzanne);
     }
 
     @Override
     public void onSurfaceChanged(GL10 gl10, int height, int width) {
-        GLES20.glViewport(0, 0, height, width);
-
-        final float ratio = (float) width / height;
-        final float left = -ratio;
-        final float right = ratio;
-        final float bottom = -1.0f;
-        final float top = 1.0f;
-        final float near = 1.0f;
-        final float far = 1000.0f;
-
-        Matrix.frustumM(projectionMatrix, 0, left, right, bottom, top, near, far);
+       // GLES20.glViewport(0, 0, height, width);
     }
 
     @Override
     public void onDrawFrame(GL10 gl10) {
-        GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
-        GLES20.glUseProgram(programID);
-
-        // Set-up uniform handles
-        mModelViewMatrixID = GLES20.glGetUniformLocation(programID, "mModelView");
-        mProjectionMatrixID = GLES20.glGetUniformLocation(programID, "mProjection");
-        // Set-up attribute handles
-        aPosition = GLES20.glGetAttribLocation(programID, "aPosition");
-        aNormal = GLES20.glGetAttribLocation(programID, "aNormal");
-        aColor = GLES20.glGetAttribLocation(programID, "aColor");
-
-        //TODO add input-dependent Model matrix calculations
-        Matrix.setIdentityM(modelMatrix, 0);
-
-        // Calculate Model and View matrices
-        Matrix.multiplyMM(MVMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-        // Pass MVMatrix data to mModelView uniform
-        GLES20.glUniformMatrix4fv(mModelViewMatrixID, 1, false, MVMatrix, 0);
-
-        // Pass Projection data mProjection uniform
-        GLES20.glUniformMatrix4fv(mProjectionMatrixID, 1, false, projectionMatrix, 0);
-
-        bob.render(aPosition, aNormal, aColor);
+        jk.render();
     }
 
     public int loadTexture(Context context, int resourceID) {
@@ -209,7 +125,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         return shaderHandle;
     }
 
-    private int createAndLinkProgram(int vertexShaderID, int fragmentShaderID, final String[] attributes) {
+    private int createAndLinkProgram(int vertexShaderID, int fragmentShaderID/*, final String[] attributes*/) {
         int programID = GLES20.glCreateProgram();
 
         if(programID != 0){
@@ -217,12 +133,12 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             GLES20.glAttachShader(programID, fragmentShaderID);
 
             // Bind attributes
-            if (attributes != null) {
+         /*   if (attributes != null) {
                 final int size = attributes.length;
                 for (int i = 0; i < size; i++) {
                     GLES20.glBindAttribLocation(programID, i, attributes[i]);
                 }
-            }
+            } */
 
             GLES20.glLinkProgram(programID);
 
