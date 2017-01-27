@@ -34,7 +34,7 @@
         jumboMode="true"
         optimize="true"
         revision="23.0.3"
-        sha1="b4a8c35606fe9976b626be6980711bd8f20014c5">
+        sha1="aafff3e50081e736b2d5fdbbf888283b282ffeaf">
         <dex dex="/Users/RUSTAM/Desktop/Evade/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_8b0d634698b2544e09d27d48ae4f4d96a13fc460/classes.dex" />
     </item>
     <item
@@ -115,7 +115,7 @@
         jumboMode="true"
         optimize="true"
         revision="23.0.3"
-        sha1="67755c862764a6620ffe67907d30c88bba4da8e2">
+        sha1="4de75a07c5681a74d54d938da3e5d3479691e63f">
         <dex dex="/Users/RUSTAM/Desktop/Evade/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_c60eab96b0d7201099d3fe2e1386e96e2baf4252/classes.dex" />
     </item>
     <item
